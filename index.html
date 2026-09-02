@@ -257,7 +257,110 @@
   .pcap-row.is-alert{ background: rgba(193,92,82,0.06); }
   @keyframes rowIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
 
+  /* TRIAGE BOARD */
+  .triage-board{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:16px;
+    align-items:start;
+  }
+  .triage-col-head{
+    display:flex; align-items:center; gap:8px;
+    font-size:13.5px; color: var(--text-bright); font-weight:600;
+    margin-bottom:12px;
+  }
+  .triage-col-head .count{
+    margin-left:auto;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color: var(--text-dim);
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .dot-new{ background: var(--blue); }
+  .dot-progress{ background: var(--amber); }
+  .dot-done{ background: var(--green); }
+
+  .triage-card{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:7px;
+    padding:14px 14px 12px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition: border-color 0.15s;
+  }
+  .triage-card:hover{ border-color: #38445a; }
+  .triage-card.is-done{ opacity:0.75; }
+  .triage-card-top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .triage-card .id{ font-size:11px; color: var(--text-dim); }
+  .triage-card h4{ font-size:14px; color: var(--text-bright); font-weight:600; margin-bottom:6px; line-height:1.3; }
+  .triage-card p{ font-size:12.5px; color: var(--text-dim); line-height:1.5; margin-bottom:10px; }
+
+  .sev{
+    font-size:10.5px; font-weight:600;
+    padding: 2px 8px; border-radius:10px;
+  }
+  .sev-high{ background: rgba(193,92,82,0.15); color: var(--red); }
+  .sev-med{ background: rgba(201,143,63,0.15); color: var(--amber); }
+  .sev-low{ background: rgba(111,155,199,0.15); color: var(--blue); }
+
+  .mitre-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    color: var(--text-dim); border:1px solid var(--panel-border);
+    padding: 2px 7px; border-radius:4px;
+  }
+
+  .triage-details{
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
+  }
+  .triage-card.expanded .triage-details{
+    max-height: 500px;
+    opacity:1;
+    margin-top:12px;
+  }
+  .triage-details .difficulty{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:10px;
+  }
+  .triage-details .lbl{ font-size:11px; color: var(--text-dim); white-space:nowrap; }
+  .triage-details .bar{ display:flex; gap:3px; }
+  .triage-details .bar i{
+    width:14px; height:6px; border-radius:2px;
+    background: var(--panel-border);
+    font-style:normal;
+  }
+  .triage-details .bar i.on{ background: var(--amber); }
+  .triage-details .caution{
+    font-size:11.5px; color: var(--amber);
+    background: rgba(201,143,63,0.08);
+    border-left:2px solid var(--amber);
+    padding: 7px 10px;
+    margin-bottom:10px;
+    line-height:1.5;
+  }
+  .triage-details ol{
+    padding-left:18px;
+    font-size:12.5px;
+    color: var(--text);
+    line-height:1.7;
+  }
+  .triage-details code{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    background: rgba(255,255,255,0.06);
+    padding:1px 5px;
+    border-radius:3px;
+    color: var(--text-bright);
+  }
+
   @media (max-width: 760px){
+    .triage-board{ grid-template-columns: 1fr; }
     .pcap-head, .pcap-row{ grid-template-columns: 70px 90px 90px 60px 1fr; font-size:10.5px; }
     .hero{ grid-template-columns:1fr; padding-top:44px; }
     .hero h1{ font-size:32px; max-width:none; }
@@ -305,6 +408,135 @@
         <span>Time</span><span>Source</span><span>Destination</span><span>Protocol</span><span>Info</span>
       </div>
       <div class="pcap-body" id="pcap-feed"></div>
+    </div>
+  </section>
+
+  <section class="section" id="triage">
+    <h2>Vulnerability triage</h2>
+    <p class="sub">How findings from this lab move from initial detection through to resolution. Click a card to see the remediation steps.</p>
+    <div class="triage-board">
+      <div class="triage-col">
+        <div class="triage-col-head"><span class="dot dot-new"></span>New <span class="count">2</span></div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-high">High</span>
+            <span class="mono id">FND-014</span>
+          </div>
+          <h4>Repeated SSH auth failures from single source</h4>
+          <p>192.168.1.50 sent 40+ failed logins in under 2 minutes against the Ubuntu agent.</p>
+          <span class="mitre-tag">T1110</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div>
+            <div class="caution">Caution: confirm the source isn't a misconfigured internal script before blocking — check for scheduled jobs from that host first.</div>
+            <ol>
+              <li>Confirm 192.168.1.50 is not an authorized host on this network.</li>
+              <li>Block the source: <code>sudo ufw deny from 192.168.1.50</code></li>
+              <li>Check <code>/var/log/auth.log</code> for any successful login from that IP before the block.</li>
+              <li>If a successful login is found, rotate the affected account's credentials immediately.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-med">Medium</span>
+            <span class="mono id">FND-015</span>
+          </div>
+          <h4>Unusual sudo cache access pattern</h4>
+          <p>Sudo timestamp file accessed outside normal working hours on ubuntu-VirtualBox.</p>
+          <span class="mitre-tag">T1548</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="caution">Caution: clearing sudo cache will force re-authentication for all active sessions on the host.</div>
+            <ol>
+              <li>Check when the timestamp file was last modified: <code>ls -la /var/lib/sudo/ts/</code></li>
+              <li>Correlate the access time against that user's actual login session in <code>last</code>.</li>
+              <li>If unexplained, clear the cache: <code>sudo -k</code></li>
+              <li>Review <code>/etc/sudoers</code> for overly permissive NOPASSWD entries.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="triage-col">
+        <div class="triage-col-head"><span class="dot dot-progress"></span>Investigating <span class="count">2</span></div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-high">High</span>
+            <span class="mono id">FND-011</span>
+          </div>
+          <h4>File integrity alert on /etc/passwd</h4>
+          <p>Confirmed unauthorized write; tracing back to the session that triggered it.</p>
+          <span class="mitre-tag">T1485</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+            <div class="caution">Caution: ensure a current backup exists before restoring — an incorrect restore can lock out valid accounts.</div>
+            <ol>
+              <li>Diff the file against the last known-good backup.</li>
+              <li>Check <code>auditd</code> logs to find the process and user that wrote to the file.</li>
+              <li>If unauthorized, restore from backup and re-run file integrity checks.</li>
+              <li>Widen the FIM watch scope to catch related config files.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-low">Low</span>
+            <span class="mono id">FND-012</span>
+          </div>
+          <h4>Valid account used from unfamiliar process</h4>
+          <p>Legitimate credentials, but the parent process doesn't match normal usage.</p>
+          <span class="mitre-tag">T1078</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="caution">Caution: disabling the account will interrupt any of that user's active sessions.</div>
+            <ol>
+              <li>Trace the process tree: <code>ps -ef --forest</code></li>
+              <li>Confirm whether the parent process matches an approved script or service.</li>
+              <li>If unclear, temporarily disable the account and force a password reset.</li>
+              <li>Enable extra process auditing for that account going forward.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="triage-col">
+        <div class="triage-col-head"><span class="dot dot-done"></span>Resolved <span class="count">2</span></div>
+        <div class="triage-card is-done" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-high">High</span>
+            <span class="mono id">FND-008</span>
+          </div>
+          <h4>Brute force against SSH — blocked</h4>
+          <p>Active response fired, source IP dropped at the firewall within seconds.</p>
+          <span class="mitre-tag">T1110</span>
+          <div class="triage-details">
+            <div class="caution" style="border-color: var(--panel-border); color: var(--text-dim);">Resolution log — actions already taken.</div>
+            <ol>
+              <li>Wazuh's active response rule triggered automatically at the failure threshold.</li>
+              <li>Source IP was added to the firewall block list for 24 hours.</li>
+              <li>Confirmed no successful authentication occurred before the block.</li>
+              <li>Follow-up: lowered the alert threshold to 5 attempts per 60 seconds for faster response.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="triage-card is-done" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-med">Medium</span>
+            <span class="mono id">FND-009</span>
+          </div>
+          <h4>Suspicious command execution</h4>
+          <p>Traced to a test script; rule tuned to reduce false positives going forward.</p>
+          <span class="mitre-tag">T1059</span>
+          <div class="triage-details">
+            <div class="caution" style="border-color: var(--panel-border); color: var(--text-dim);">Resolution log — actions already taken.</div>
+            <ol>
+              <li>Identified the command matched a known test script (<code>whoami; id</code>).</li>
+              <li>Added a rule exception scoped to that script's file hash.</li>
+              <li>Confirmed no lateral movement followed the execution.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -469,6 +701,11 @@
   }
   for(let k=0;k<9;k++){ setTimeout(addPacket, k*120); }
   setInterval(addPacket, 650);
+
+  // Triage card expand/collapse
+  function toggleTriage(card){
+    card.classList.toggle('expanded');
+  }
 </script>
 
 </body>
