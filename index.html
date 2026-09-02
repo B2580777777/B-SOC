@@ -1,1 +1,475 @@
-Add live traffic panel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blabu's SOC Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0b0f16;
+    --panel: #121722;
+    --panel-border: #232c3a;
+    --text: #adb6c2;
+    --text-bright: #eef1f5;
+    --text-dim: #647087;
+    --green: #4fa88a;
+    --amber: #c98f3f;
+    --red: #c15c52;
+    --blue: #6f9bc7;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:inherit; }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  .wrap{
+    max-width: 1080px;
+    margin:0 auto;
+    padding: 0 28px;
+  }
+
+  /* NAV */
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-weight:600; font-size:17px; color:var(--text-bright);
+  }
+  .logo-dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--green);
+  }
+  .navlinks{ display:flex; gap:32px; font-size:14px; color:var(--text-dim); }
+  .navlinks a:hover{ color: var(--text-bright); }
+
+  /* HERO */
+  .hero{
+    padding: 72px 0 56px;
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size: 44px;
+    line-height:1.15;
+    color: var(--text-bright);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    max-width: 460px;
+  }
+  .hero p.lead{
+    margin-top:18px;
+    font-size:16px;
+    color: var(--text);
+    max-width: 420px;
+  }
+  .hero-ctas{ margin-top:28px; display:flex; gap:14px; }
+  .btn{
+    padding: 11px 20px;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid transparent;
+    display:inline-block;
+  }
+  .btn-primary{ background: var(--text-bright); color: var(--bg); }
+  .btn-ghost{ border-color: var(--panel-border); color: var(--text-bright); }
+
+  /* terminal panel */
+  .terminal{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .terminal-bar{
+    display:flex; align-items:center; gap:7px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .terminal-bar span{
+    width:9px; height:9px; border-radius:50%; background:#2a3542;
+  }
+  .terminal-body{
+    padding:16px 18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color: var(--text-dim);
+    min-height: 220px;
+  }
+  .terminal-body .line{ margin-bottom:9px; white-space:pre; opacity:0; animation: appear 0.3s forwards; }
+  .terminal-body .t-crit{ color: var(--red); }
+  .terminal-body .t-warn{ color: var(--amber); }
+  .terminal-body .t-ok{ color: var(--green); }
+  @keyframes appear{ to{ opacity:1; } }
+
+  /* SECTION HEADS */
+  .section{ padding: 56px 0; border-top:1px solid var(--panel-border); }
+  .section h2{
+    font-size:24px; color:var(--text-bright); font-weight:700; margin-bottom:10px;
+  }
+  .section .sub{ color: var(--text-dim); font-size:14.5px; max-width:520px; margin-bottom:32px; }
+
+  /* ARCHITECTURE */
+  .arch{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:0;
+    align-items:center;
+    text-align:center;
+  }
+  .arch-step{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    padding: 20px 14px;
+    font-size:13px;
+  }
+  .arch-step .num{ color: var(--green); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-bottom:8px; display:block; }
+  .arch-arrow{ color: var(--text-dim); font-size:18px; }
+  .arch-grid-mobile{ display:none; }
+
+  /* METRICS */
+  .metrics{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:14px;
+  }
+  .metric-card{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    padding: 20px;
+  }
+  .metric-card .label{ font-size:12.5px; color: var(--text-dim); margin-bottom:8px; }
+  .metric-card .value{ font-family:'IBM Plex Mono', monospace; font-size:28px; color: var(--text-bright); font-weight:600; }
+  .metric-card .value.red{ color: var(--red); }
+  .metric-card .value.amber{ color: var(--amber); }
+  .metric-card .value.green{ color: var(--green); }
+
+  /* WRITEUPS */
+  .writeups{ display:flex; flex-direction:column; gap:0; }
+  .writeup{
+    display:grid;
+    grid-template-columns: 130px 1fr;
+    gap:24px;
+    padding: 22px 0;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .writeup:first-child{ padding-top:0; }
+  .writeup .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color: var(--text-dim);
+    padding-top:3px;
+  }
+  .writeup h3{ font-size:16px; color:var(--text-bright); margin-bottom:6px; font-weight:600; }
+  .writeup p{ font-size:14px; color: var(--text-dim); max-width: 520px; }
+  .writeup .mitre{
+    display:inline-block; margin-top:10px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px;
+    color: var(--blue); background: rgba(91,157,217,0.1);
+    padding: 3px 8px; border-radius:4px;
+  }
+
+  /* STACK */
+  .stack-list{ display:flex; flex-wrap:wrap; gap:10px; }
+  .stack-pill{
+    border:1px solid var(--panel-border);
+    padding:8px 14px; border-radius:20px;
+    font-size:13px; color: var(--text);
+    background: var(--panel);
+  }
+
+  footer{
+    padding: 36px 0 48px;
+    border-top:1px solid var(--panel-border);
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color: var(--text-dim);
+  }
+  footer a{ color: var(--text); text-decoration:none; }
+  footer a:hover{ color: var(--text-bright); }
+
+  /* PACKET CAPTURE */
+  .pcap{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .pcap-head{
+    display:grid;
+    grid-template-columns: 100px 140px 140px 90px 1fr;
+    gap:10px;
+    padding: 10px 16px;
+    border-bottom:1px solid var(--panel-border);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color: var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .pcap-body{
+    height: 260px;
+    overflow:hidden;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+  }
+  .pcap-row{
+    display:grid;
+    grid-template-columns: 100px 140px 140px 90px 1fr;
+    gap:10px;
+    padding: 7px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    color: var(--text);
+    opacity:0;
+    animation: rowIn 0.25s forwards;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .pcap-row .proto{
+    display:inline-block;
+    padding:1px 7px;
+    border-radius:3px;
+    font-size:10.5px;
+  }
+  .proto-tcp{ background: rgba(111,155,199,0.15); color: var(--blue); }
+  .proto-ssh{ background: rgba(201,143,63,0.15); color: var(--amber); }
+  .proto-alert{ background: rgba(193,92,82,0.18); color: var(--red); }
+  .proto-http{ background: rgba(79,168,138,0.15); color: var(--green); }
+  .pcap-row.is-alert{ background: rgba(193,92,82,0.06); }
+  @keyframes rowIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
+
+  @media (max-width: 760px){
+    .pcap-head, .pcap-row{ grid-template-columns: 70px 90px 90px 60px 1fr; font-size:10.5px; }
+    .hero{ grid-template-columns:1fr; padding-top:44px; }
+    .hero h1{ font-size:32px; max-width:none; }
+    .arch{ grid-template-columns:1fr; gap:10px; }
+    .arch-arrow{ display:none; }
+    .metrics{ grid-template-columns: 1fr 1fr; }
+    .writeup{ grid-template-columns:1fr; gap:6px; }
+    footer{ flex-direction:column; gap:10px; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="logo"><span class="logo-dot"></span>Blabu's SOC Lab</div>
+    <div class="navlinks">
+      <a href="#architecture">Architecture</a>
+      <a href="#metrics">Live metrics</a>
+      <a href="#writeups">Detections</a>
+      <a href="#stack">Stack</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <h1>A home SOC that watches, detects, and blocks real attacks.</h1>
+      <p class="lead">Blabu's SOC Lab is a self-built Security Operations Center running Wazuh SIEM against live Ubuntu and Kali agents — mapped to MITRE ATT&CK, alerting in real time, and documented end to end.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#writeups">Read the detections</a>
+        <a class="btn btn-ghost" href="#">View on GitHub</a>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><span></span><span></span><span></span></div>
+      <div class="terminal-body" id="feed"></div>
+    </div>
+  </section>
+
+  <section class="section" id="traffic" style="border-top:none; padding-top:0;">
+    <h2>Live traffic capture</h2>
+    <p class="sub">A simulated packet stream from the lab network — styled after the analyst tools this project is built around.</p>
+    <div class="pcap">
+      <div class="pcap-head">
+        <span>Time</span><span>Source</span><span>Destination</span><span>Protocol</span><span>Info</span>
+      </div>
+      <div class="pcap-body" id="pcap-feed"></div>
+    </div>
+  </section>
+
+  <section class="section" id="architecture">
+    <h2>How it's wired</h2>
+    <p class="sub">One attacker box, one monitored endpoint, one manager tying it together.</p>
+    <div class="arch">
+      <div class="arch-step"><span class="num">01</span>Kali agent generates attack traffic</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-step"><span class="num">02</span>Ubuntu endpoint logs system + auth events</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-step"><span class="num">03</span>Wazuh manager correlates against rules</div>
+    </div>
+  </section>
+
+  <section class="section" id="metrics">
+    <h2>Last 24 hours</h2>
+    <p class="sub">Pulled straight from the Wazuh dashboard running on this lab.</p>
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="label">Total alerts</div>
+        <div class="value">24</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Critical severity</div>
+        <div class="value red">7</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Threats blocked</div>
+        <div class="value green">15</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Top tactic</div>
+        <div class="value amber" style="font-size:20px;">Defense Evasion</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="writeups">
+    <h2>Detections & write-ups</h2>
+    <p class="sub">Short breakdowns of attacks run against the lab and how Wazuh caught them.</p>
+    <div class="writeups">
+      <div class="writeup">
+        <div class="tag mono">SEP 2026</div>
+        <div>
+          <h3>Brute force against the Ubuntu agent, detected and blocked</h3>
+          <p>A scripted SSH brute force from the Kali box triggered repeated failed-login rules within seconds. Wazuh's active response fired and blocked the source IP before a valid session was reached.</p>
+          <span class="mitre">T1110 · Brute Force</span>
+        </div>
+      </div>
+      <div class="writeup">
+        <div class="tag mono">SEP 2026</div>
+        <div>
+          <h3>Tracking a privilege escalation attempt through sudo abuse</h3>
+          <p>Sudo and sudo-cache manipulation attempts showed up as a distinct cluster in the tactics breakdown, letting me trace the technique back to a misconfigured sudoers rule on the test host.</p>
+          <span class="mitre">T1548 · Privilege Escalation</span>
+        </div>
+      </div>
+      <div class="writeup">
+        <div class="tag mono">SEP 2026</div>
+        <div>
+          <h3>Mapping file deletion events to a Data Destruction tactic</h3>
+          <p>A test file-wipe script surfaced as file integrity monitoring alerts, then rolled up into the Impact and Defense Evasion tactics on the dashboard's MITRE breakdown.</p>
+          <span class="mitre">T1485 · Data Destruction</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="stack">
+    <h2>Built with</h2>
+    <p class="sub">Everything here is open source and runs on hardware I own.</p>
+    <div class="stack-list">
+      <div class="stack-pill">Wazuh SIEM</div>
+      <div class="stack-pill">Ubuntu Server</div>
+      <div class="stack-pill">Kali Linux</div>
+      <div class="stack-pill">MITRE ATT&CK</div>
+      <div class="stack-pill">VirtualBox</div>
+      <div class="stack-pill">DQL / Wazuh Query</div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <h2>About this lab</h2>
+    <p class="sub" style="max-width:640px;">Blabu's SOC Lab is a self-directed project built to develop and demonstrate hands-on detection engineering skills outside of a formal SOC role.</p>
+    <div class="writeups" style="border-top:none;">
+      <div class="writeup" style="grid-template-columns: 1fr;">
+        <div>
+          <p style="max-width:640px; color:var(--text); font-size:14.5px; margin-bottom:14px;">
+            Every alert on this site comes from a real attack run against the lab, not a simulated screenshot. The goal is to practice the full detection lifecycle: generate realistic attacker behavior, tune correlation rules, map the result to MITRE ATT&CK, and write up the reasoning the way an analyst would document it for a handoff.
+          </p>
+          <p style="max-width:640px; color:var(--text); font-size:14.5px;">
+            Currently working through log analysis, endpoint detection, and active response configuration. Next milestones: adding Suricata for network-based detection and building a basic SOAR playbook for automated triage.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-ctas" style="margin-top:24px;">
+      <a class="btn btn-ghost" href="#">Download resume</a>
+      <a class="btn btn-ghost" href="#">Contact</a>
+    </div>
+  </section>
+
+  <footer>
+    <div>Blabu's SOC Lab — a personal SOC lab, built to learn detection engineering.</div>
+    <div><a href="#">GitHub</a> &nbsp;·&nbsp; <a href="#">LinkedIn</a></div>
+  </footer>
+</div>
+
+<script>
+  const lines = [
+    { t: '2026-09-01 15:02:11', msg: 'sshd: Failed password for invalid user admin from 192.168.1.50', cls:'t-warn' },
+    { t: '2026-09-01 15:02:14', msg: 'wazuh: Brute force attack detected — source 192.168.1.50', cls:'t-crit' },
+    { t: '2026-09-01 15:02:15', msg: 'active-response: firewall-drop executed on 192.168.1.50', cls:'t-ok' },
+    { t: '2026-09-01 15:03:02', msg: 'auditd: sudo executed command /bin/cat by user ubuntu', cls:'' },
+    { t: '2026-09-01 15:03:40', msg: 'syscheck: Suspicious command execution detected', cls:'t-warn' },
+    { t: '2026-09-01 15:04:12', msg: 'wazuh: Unauthorized file change — /etc/passwd', cls:'t-crit' },
+    { t: '2026-09-01 15:04:13', msg: 'agent ubuntu-VirtualBox: alert forwarded to manager', cls:'' },
+  ];
+  const feed = document.getElementById('feed');
+  let i = 0;
+  function addLine(){
+    if(i >= lines.length){ i = 0; feed.innerHTML=''; }
+    const l = lines[i];
+    const div = document.createElement('div');
+    div.className = 'line ' + l.cls;
+    div.textContent = `[${l.t}] ${l.msg}`;
+    feed.appendChild(div);
+    i++;
+    if(feed.children.length > 6){ feed.removeChild(feed.children[0]); }
+  }
+  addLine();
+  setInterval(addLine, 1900);
+
+  // Packet capture feed
+  const pcapFeed = document.getElementById('pcap-feed');
+  const sources = ['192.168.1.50','192.168.1.10','192.168.1.25','10.0.2.15','192.168.1.10'];
+  const dests   = ['192.168.1.10','192.168.1.50','8.8.8.8','192.168.1.1','192.168.1.10'];
+  const packets = [
+    { proto:'TCP', cls:'proto-tcp', info:'443 → 51422 [ACK] Seq=1 Ack=1 Win=64240' },
+    { proto:'SSH', cls:'proto-ssh', info:'Client: Protocol (SSH-2.0-OpenSSH_8.9)' },
+    { proto:'SSH', cls:'proto-ssh', info:'Encrypted request packet len=52' },
+    { proto:'TCP', cls:'proto-tcp', info:'22 → 44810 [SYN, ACK] Seq=0 Ack=1' },
+    { proto:'HTTP', cls:'proto-http', info:'GET /dashboard HTTP/1.1' },
+    { proto:'ALERT', cls:'proto-alert', info:'Repeated auth failure — brute force pattern flagged', alert:true },
+    { proto:'TCP', cls:'proto-tcp', info:'51423 → 22 [PSH, ACK] Seq=41 Ack=88' },
+    { proto:'ALERT', cls:'proto-alert', info:'Unauthorized file change detected — /etc/passwd', alert:true },
+  ];
+
+  function randIP(list){ return list[Math.floor(Math.random()*list.length)]; }
+
+  function addPacket(){
+    const p = packets[Math.floor(Math.random()*packets.length)];
+    const now = new Date();
+    const ts = now.toTimeString().slice(0,8) + '.' + String(now.getMilliseconds()).padStart(3,'0');
+    const row = document.createElement('div');
+    row.className = 'pcap-row' + (p.alert ? ' is-alert' : '');
+    row.innerHTML = `<span>${ts}</span><span>${randIP(sources)}</span><span>${randIP(dests)}</span><span class="proto ${p.cls}">${p.proto}</span><span>${p.info}</span>`;
+    pcapFeed.appendChild(row);
+    if(pcapFeed.children.length > 14){ pcapFeed.removeChild(pcapFeed.children[0]); }
+    pcapFeed.scrollTop = pcapFeed.scrollHeight;
+  }
+  for(let k=0;k<9;k++){ setTimeout(addPacket, k*120); }
+  setInterval(addPacket, 650);
+</script>
+
+</body>
+</html>
