@@ -1,1 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B-SOC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
+  :root{
+    --bg: #f4f8fc;
+    --panel: #ffffff;
+    --panel-border: #d7e3f0;
+    --text: #3d4b5c;
+    --text-bright: #16202c;
+    --text-dim: #7086a0;
+    --green: #1f9d73;
+    --amber: #b8791f;
+    --red: #c8453a;
+    --blue: #2f7fd1;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:inherit; }
+
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  .wrap{
+    max-width: 1080px;
+    margin:0 auto;
+    padding: 0 28px;
+  }
+
+  /* NAV */
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-weight:600; font-size:17px; color:var(--text-bright);
+  }
+  .logo-dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--green);
+  }
+  .navlinks{ display:flex; gap:32px; font-size:14px; color:var(--text-dim); }
+  .navlinks a:hover{ color: var(--text-bright); }
+
+  /* HERO */
+  .hero{
+    padding: 72px 0 56px;
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size: 44px;
+    line-height:1.15;
+    color: var(--text-bright);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    max-width: 460px;
+  }
+  .hero p.lead{
+    margin-top:18px;
+    font-size:16px;
+    color: var(--text);
+    max-width: 420px;
+  }
+  .hero-ctas{ margin-top:28px; display:flex; gap:14px; }
+  .btn{
+    padding: 11px 20px;
+    border-radius:6px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid transparent;
+    display:inline-block;
+  }
+  .btn-primary{ background: var(--text-bright); color: var(--bg); }
+  .btn-ghost{ border-color: var(--panel-border); color: var(--text-bright); }
+
+  /* terminal panel */
+  .terminal{
+    --panel: #131822;
+    --panel-border: #262f3d;
+    --text: #adb6c2;
+    --text-bright: #f0f3f6;
+    --text-dim: #6b7684;
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .terminal-bar{
+    display:flex; align-items:center; gap:7px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .terminal-bar span{
+    width:9px; height:9px; border-radius:50%; background:#2a3542;
+  }
+  .terminal-body{
+    padding:16px 18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color: var(--text-dim);
+    min-height: 220px;
+  }
+  .terminal-body .line{ margin-bottom:9px; white-space:pre; opacity:0; animation: appear 0.3s forwards; }
+  .terminal-body .t-crit{ color: var(--red); }
+  .terminal-body .t-warn{ color: var(--amber); }
+  .terminal-body .t-ok{ color: var(--green); }
+  @keyframes appear{ to{ opacity:1; } }
+
+  /* SECTION HEADS */
+  .section{ padding: 56px 0; border-top:1px solid var(--panel-border); }
+  .section h2{
+    font-size:24px; color:var(--text-bright); font-weight:700; margin-bottom:10px;
+  }
+  .section .sub{ color: var(--text-dim); font-size:14.5px; max-width:520px; margin-bottom:32px; }
+
+  /* ARCHITECTURE */
+  .arch{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:0;
+    align-items:center;
+    text-align:center;
+  }
+  .arch-step{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    padding: 20px 14px;
+    font-size:13px;
+  }
+  .arch-step .num{ color: var(--green); font-family:'IBM Plex Mono',monospace; font-size:12px; margin-bottom:8px; display:block; }
+  .arch-arrow{ color: var(--text-dim); font-size:18px; }
+  .arch-grid-mobile{ display:none; }
+
+  /* METRICS */
+  .metrics{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:14px;
+  }
+  .metric-card{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    padding: 20px;
+  }
+  .metric-card .label{ font-size:12.5px; color: var(--text-dim); margin-bottom:8px; }
+  .metric-card .value{ font-family:'IBM Plex Mono', monospace; font-size:28px; color: var(--text-bright); font-weight:600; }
+  .metric-card .value.red{ color: var(--red); }
+  .metric-card .value.amber{ color: var(--amber); }
+  .metric-card .value.green{ color: var(--green); }
+
+  /* WRITEUPS */
+  .writeups{ display:flex; flex-direction:column; gap:0; }
+  .writeup{
+    display:grid;
+    grid-template-columns: 130px 1fr;
+    gap:24px;
+    padding: 22px 0;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .writeup:first-child{ padding-top:0; }
+  .writeup .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color: var(--text-dim);
+    padding-top:3px;
+  }
+  .writeup h3{ font-size:16px; color:var(--text-bright); margin-bottom:6px; font-weight:600; }
+  .writeup p{ font-size:14px; color: var(--text-dim); max-width: 520px; }
+  .writeup .mitre{
+    display:inline-block; margin-top:10px;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px;
+    color: var(--blue); background: rgba(91,157,217,0.1);
+    padding: 3px 8px; border-radius:4px;
+  }
+
+  /* STACK */
+  .stack-list{ display:flex; flex-wrap:wrap; gap:10px; }
+  .stack-pill{
+    border:1px solid var(--panel-border);
+    padding:8px 14px; border-radius:20px;
+    font-size:13px; color: var(--text);
+    background: var(--panel);
+  }
+
+  footer{
+    padding: 36px 0 48px;
+    border-top:1px solid var(--panel-border);
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color: var(--text-dim);
+  }
+  footer a{ color: var(--text); text-decoration:none; }
+  footer a:hover{ color: var(--text-bright); }
+
+  /* WIRESHARK-STYLE CAPTURE PANEL */
+  .wireshark{
+    --panel: #131822;
+    --panel-border: #262f3d;
+    --text: #adb6c2;
+    --text-bright: #f0f3f6;
+    --text-dim: #6b7684;
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    overflow:hidden;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .ws-titlebar{
+    display:flex; align-items:center; gap:8px;
+    padding:9px 14px;
+    font-size:12px; color: var(--text-dim);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .ws-rec{ width:8px; height:8px; border-radius:50%; background: var(--green); }
+  .ws-menubar{
+    display:flex; gap:16px; flex-wrap:wrap;
+    padding:7px 14px;
+    font-size:11.5px; color: var(--text-dim);
+    font-family:'IBM Plex Sans', sans-serif;
+    border-bottom:1px solid var(--panel-border);
+    position:relative;
+  }
+  .ws-menu-item{ cursor:pointer; padding:3px 6px; border-radius:4px; position:relative; }
+  .ws-menu-item:hover, .ws-menu-item.active{ background: rgba(255,255,255,0.06); color: var(--text-bright); }
+  .ws-dropdown{
+    position:absolute; top:100%; left:0; margin-top:6px;
+    background: #17202c; border:1px solid var(--panel-border);
+    border-radius:6px; min-width:210px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    z-index:20; overflow:hidden;
+    display:none;
+  }
+  .ws-menu-item.active .ws-dropdown{ display:block; }
+  .ws-dropdown div{
+    padding:8px 12px; font-size:12px; color: var(--text);
+    cursor:pointer; white-space:nowrap;
+  }
+  .ws-dropdown div:hover{ background: rgba(111,155,199,0.15); color: var(--text-bright); }
+  .ws-dropdown div.disabled{ color: var(--text-dim); cursor:not-allowed; }
+  .ws-dropdown div.disabled:hover{ background:none; color: var(--text-dim); }
+
+  .ws-toast{
+    position:fixed; bottom:24px; left:50%; transform: translateX(-50%) translateY(20px);
+    background: #17202c; border:1px solid var(--panel-border);
+    color: var(--text-bright); font-size:13px;
+    padding:10px 18px; border-radius:7px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity:0; pointer-events:none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index:100;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+  .ws-toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  /* UPLOADER */
+  .uploader-drop{
+    background: var(--panel);
+    border:1.5px dashed var(--panel-border);
+    border-radius:10px;
+    padding: 40px 24px;
+    text-align:center;
+    cursor:pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .uploader-drop:hover, .uploader-drop.drag-over{
+    border-color: var(--blue);
+    background: rgba(111,155,199,0.05);
+  }
+  .uploader-icon{ font-size:26px; color: var(--text-dim); margin-bottom:10px; }
+  .uploader-text{ font-size:14.5px; color: var(--text); margin-bottom:8px; }
+  .uploader-link{ color: var(--blue); text-decoration:underline; cursor:pointer; }
+  .uploader-hint{ font-size:12px; color: var(--text-dim); margin-top:4px; }
+
+  .scan-summary{
+    display:flex; gap:14px; margin: 24px 0 18px;
+    flex-wrap:wrap;
+  }
+  .scan-summary .chip{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    border:1px solid var(--panel-border);
+    border-radius:20px;
+    padding:6px 14px;
+    color: var(--text);
+  }
+  .scan-summary .chip b{ color: var(--text-bright); }
+
+  .advisory-card{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--panel-border);
+    border-radius:7px;
+    padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .advisory-card.crit{ border-left-color: var(--red); }
+  .advisory-card.high{ border-left-color: var(--amber); }
+  .advisory-card.med{ border-left-color: var(--blue); }
+  .advisory-card.low{ border-left-color: var(--green); }
+  .advisory-top{
+    display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;
+  }
+  .advisory-rank{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--text-dim);
+  }
+  .advisory-card h4{ font-size:15px; color: var(--text-bright); margin:4px 0 6px; }
+  .advisory-card .meta{ font-size:11.5px; color: var(--text-dim); margin-bottom:10px; font-family:'IBM Plex Mono', monospace; }
+  .advisory-card .desc{ font-size:13px; color: var(--text); margin-bottom:12px; line-height:1.55; }
+  .advisory-card ol{ padding-left:18px; font-size:12.5px; color: var(--text); line-height:1.7; }
+
+  /* SCREENSHOT FRAME */
+  .screenshot-frame{
+    margin-top: 24px;
+    border-radius:12px;
+    overflow:hidden;
+    border: 1px solid var(--panel-border);
+    background: linear-gradient(180deg, #eaf2fb 0%, #f4f8fc 100%);
+    padding: 14px;
+    box-shadow: 0 12px 28px rgba(47,127,209,0.08);
+  }
+  .screenshot-frame img{
+    width:100%;
+    display:block;
+    border-radius:7px;
+    border: 1px solid var(--panel-border);
+  }
+  .screenshot-caption{
+    font-size:12.5px;
+    color: var(--text-dim);
+    margin-top:10px;
+    padding: 0 4px;
+  }
+  .ws-toolbar{
+    display:flex; align-items:center; gap:10px;
+    padding:6px 14px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .ws-icon{ font-size:13px; color: var(--text-dim); opacity:0.75; cursor:pointer; padding:2px 4px; border-radius:3px; }
+  .ws-icon:hover{ opacity:1; background: rgba(255,255,255,0.06); color: var(--text-bright); }
+  .ws-icon.disabled{ opacity:0.25; cursor:not-allowed; }
+  .ws-icon.disabled:hover{ background:none; color: var(--text-dim); }
+  .ws-sep{ width:1px; height:14px; background: var(--panel-border); }
+  .ws-filterbar{
+    display:flex; align-items:center; gap:8px;
+    padding:7px 14px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .ws-filter-icon{ font-size:12px; color: var(--text-dim); }
+  .ws-filterbar input{
+    flex:1;
+    background: var(--bg);
+    border:1px solid var(--panel-border);
+    border-radius:4px;
+    padding:5px 10px;
+    font-size:11.5px;
+    color: var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .ws-list-head{
+    display:grid;
+    grid-template-columns: 44px 76px 118px 118px 76px 56px 1fr;
+    gap:8px;
+    padding: 6px 14px;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color: var(--text-dim);
+    border-bottom:1px solid var(--panel-border);
+  }
+  .ws-list{
+    height: 280px;
+    overflow:hidden;
+    font-size:11.5px;
+  }
+  .ws-row{
+    display:grid;
+    grid-template-columns: 44px 76px 118px 118px 76px 56px 1fr;
+    gap:8px;
+    padding: 4px 14px;
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    color: var(--text);
+    opacity:0;
+    animation: rowIn 0.2s forwards;
+    white-space:nowrap;
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .ws-row:hover{ background: rgba(255,255,255,0.03); }
+  .ws-row.selected{ background: rgba(111,155,199,0.18) !important; }
+  .ws-row .proto{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:600;
+  }
+  .proto-tcp{ color: var(--blue); }
+  .proto-ssh{ color: var(--amber); }
+  .proto-alert{ color: var(--red); }
+  .proto-http{ color: var(--green); }
+  .ws-row.is-alert{ background: rgba(193,92,82,0.06); }
+  @keyframes rowIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
+
+  .ws-detail{
+    display:grid;
+    grid-template-columns: 1.2fr 1fr;
+    border-top:1px solid var(--panel-border);
+    font-size:11px;
+    min-height:130px;
+  }
+  .ws-detail-tree{
+    padding:12px 14px;
+    color: var(--text);
+    line-height:1.9;
+    border-right:1px solid var(--panel-border);
+  }
+  .ws-detail-tree .hi{ color: var(--text-bright); }
+  .ws-detail-tree .arrow{ color: var(--text-dim); margin-right:5px; }
+  .ws-hint{ color: var(--text-dim); font-style:italic; }
+  .ws-detail-hex{
+    padding:12px 14px;
+    color: var(--text-dim);
+    line-height:1.8;
+    white-space:pre;
+    overflow-x:auto;
+    font-size:10.5px;
+  }
+  .ws-statusbar{
+    padding:6px 14px;
+    font-size:10.5px;
+    color: var(--text-dim);
+    border-top:1px solid var(--panel-border);
+  }
+
+  /* TRIAGE BOARD */
+  .triage-board{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:16px;
+    align-items:start;
+  }
+  .triage-col-head{
+    display:flex; align-items:center; gap:8px;
+    font-size:13.5px; color: var(--text-bright); font-weight:600;
+    margin-bottom:12px;
+  }
+  .triage-col-head .count{
+    margin-left:auto;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color: var(--text-dim);
+  }
+  .dot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .dot-new{ background: var(--blue); }
+  .dot-progress{ background: var(--amber); }
+  .dot-done{ background: var(--green); }
+
+  .triage-card{
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:7px;
+    padding:14px 14px 12px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition: border-color 0.15s;
+  }
+  .triage-card:hover{ border-color: #38445a; }
+  .triage-card.is-done{ opacity:0.75; }
+  .triage-card-top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .triage-card .id{ font-size:11px; color: var(--text-dim); }
+  .triage-card h4{ font-size:14px; color: var(--text-bright); font-weight:600; margin-bottom:6px; line-height:1.3; }
+  .triage-card p{ font-size:12.5px; color: var(--text-dim); line-height:1.5; margin-bottom:10px; }
+
+  .sev{
+    font-size:10.5px; font-weight:600;
+    padding: 2px 8px; border-radius:10px;
+  }
+  .sev-high{ background: rgba(193,92,82,0.15); color: var(--red); }
+  .sev-med{ background: rgba(201,143,63,0.15); color: var(--amber); }
+  .sev-low{ background: rgba(111,155,199,0.15); color: var(--blue); }
+
+  .mitre-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    color: var(--text-dim); border:1px solid var(--panel-border);
+    padding: 2px 7px; border-radius:4px;
+  }
+
+  .triage-details{
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
+  }
+  .triage-card.expanded .triage-details{
+    max-height: 500px;
+    opacity:1;
+    margin-top:12px;
+  }
+  .triage-details .difficulty{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:10px;
+  }
+  .triage-details .lbl{ font-size:11px; color: var(--text-dim); white-space:nowrap; }
+  .triage-details .bar{ display:flex; gap:3px; }
+  .triage-details .bar i{
+    width:14px; height:6px; border-radius:2px;
+    background: var(--panel-border);
+    font-style:normal;
+  }
+  .triage-details .bar i.on{ background: var(--amber); }
+  .triage-details .caution{
+    font-size:11.5px; color: var(--amber);
+    background: rgba(201,143,63,0.08);
+    border-left:2px solid var(--amber);
+    padding: 7px 10px;
+    margin-bottom:10px;
+    line-height:1.5;
+  }
+  .triage-details ol{
+    padding-left:18px;
+    font-size:12.5px;
+    color: var(--text);
+    line-height:1.7;
+  }
+  .triage-details code{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    background: rgba(255,255,255,0.06);
+    padding:1px 5px;
+    border-radius:3px;
+    color: var(--text-bright);
+  }
+
+  @media (max-width: 760px){
+    .triage-board{ grid-template-columns: 1fr; }
+    .ws-list-head, .ws-row{ grid-template-columns: 30px 56px 84px 84px 56px 40px 1fr; font-size:10px; }
+    .ws-menubar{ overflow-x:auto; flex-wrap:nowrap; }
+    .ws-detail{ grid-template-columns: 1fr; }
+    .ws-detail-tree{ border-right:none; border-bottom:1px solid var(--panel-border); }
+    .hero{ grid-template-columns:1fr; padding-top:44px; }
+    .hero h1{ font-size:32px; max-width:none; }
+    .arch{ grid-template-columns:1fr; gap:10px; }
+    .arch-arrow{ display:none; }
+    .metrics{ grid-template-columns: 1fr 1fr; }
+    .writeup{ grid-template-columns:1fr; gap:6px; }
+    footer{ flex-direction:column; gap:10px; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="logo"><span class="logo-dot"></span>B-SOC</div>
+    <div class="navlinks">
+      <a href="#architecture">Architecture</a>
+      <a href="#metrics">Live metrics</a>
+      <a href="#writeups">Detections</a>
+      <a href="#stack">Stack</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <h1>A home SOC that watches, detects, and blocks real attacks.</h1>
+      <p class="lead">B-SOC is a self-built Security Operations Center running Wazuh SIEM against live Ubuntu and Kali agents — mapped to MITRE ATT&CK, alerting in real time, and documented end to end.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#writeups">Read the detections</a>
+        <a class="btn btn-ghost" href="#">View on GitHub</a>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><span></span><span></span><span></span></div>
+      <div class="terminal-body" id="feed"></div>
+    </div>
+  </section>
+
+  <section class="section" id="traffic" style="border-top:none; padding-top:0;">
+    <h2>Live packet capture</h2>
+    <p class="sub">A capture view modeled on Wireshark, streaming simulated traffic from the lab network. Click any packet to inspect it.</p>
+    <div class="wireshark">
+      <div class="ws-titlebar"><span class="ws-rec" id="ws-rec"></span><span id="ws-title">Capturing from Wi-Fi</span></div>
+      <div class="ws-menubar" id="ws-menubar">
+        <span class="ws-menu-item" data-menu="file">File
+          <div class="ws-dropdown">
+            <div data-action="open-upload">Open Scan for Triage…</div>
+            <div data-action="toast:Export not available in this demo build.">Export Packet Dissections…</div>
+            <div data-action="toast:This is a static portfolio demo — no live capture file to save.">Save As…</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="edit">Edit
+          <div class="ws-dropdown">
+            <div data-action="toast:Click any packet row, then use the Find button to search fields.">Find Packet…</div>
+            <div data-action="toast:Copied packet summary (demo).">Copy Summary</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="view">View
+          <div class="ws-dropdown">
+            <div data-action="expand">Expand All Frame Details</div>
+            <div data-action="collapse">Collapse Frame Details</div>
+            <div data-action="toast:Coloring rules: red = flagged alert, default = normal traffic.">Coloring Rules…</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="go">Go
+          <div class="ws-dropdown">
+            <div data-action="next">Next Packet</div>
+            <div data-action="prev">Previous Packet</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="capture">Capture
+          <div class="ws-dropdown">
+            <div data-action="start">▶ Start</div>
+            <div data-action="stop">■ Stop</div>
+            <div data-action="restart">↻ Restart</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="analyze">Analyze
+          <div class="ws-dropdown">
+            <div data-action="open-upload">Upload a Vulnerability Scan…</div>
+            <div data-action="toast:Follow Stream shows the full conversation for a selected packet.">Follow TCP Stream</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="statistics">Statistics
+          <div class="ws-dropdown">
+            <div data-action="toast:Top talker on this capture: 192.168.1.10">Conversations</div>
+            <div data-action="toast:Protocol mix: TCP 41% · SSH 24% · TLS 18% · HTTP 11% · DNS 6%">Protocol Hierarchy</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="telephony">Telephony
+          <div class="ws-dropdown">
+            <div class="disabled">VoIP Calls (n/a for this lab)</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="wireless">Wireless
+          <div class="ws-dropdown">
+            <div class="disabled">Wireless Toolbar (n/a — wired capture)</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="tools">Tools
+          <div class="ws-dropdown">
+            <div data-action="open-upload">Vulnerability Scan Triage…</div>
+            <div data-action="toast:Firewall rules are managed through Wazuh's active response module.">Firewall ACL Rules…</div>
+          </div>
+        </span>
+        <span class="ws-menu-item" data-menu="help">Help
+          <div class="ws-dropdown">
+            <div data-action="toast:B-SOC — a home SOC built with Wazuh, Ubuntu, and Kali.">About This Lab</div>
+          </div>
+        </span>
+      </div>
+      <div class="ws-toolbar">
+        <span class="ws-icon" id="ws-btn-start" title="Start capture">▶</span>
+        <span class="ws-icon" id="ws-btn-stop" title="Stop capture">■</span>
+        <span class="ws-icon" id="ws-btn-restart" title="Restart capture">↻</span>
+        <span class="ws-sep"></span>
+        <span class="ws-icon" id="ws-btn-open" title="Open scan upload">🗀</span>
+        <span class="ws-icon" id="ws-btn-save" title="Save capture (demo)">💾</span>
+        <span class="ws-icon" id="ws-btn-close" title="Close capture">✕</span>
+        <span class="ws-sep"></span>
+        <span class="ws-icon" id="ws-btn-find" title="Find packet">🔍</span>
+        <span class="ws-icon" id="ws-btn-prev" title="Previous packet">⏮</span>
+        <span class="ws-icon" id="ws-btn-next" title="Next packet">⏭</span>
+        <span class="ws-sep"></span>
+        <span class="ws-icon" id="ws-btn-expand" title="Expand all">⤒</span>
+        <span class="ws-icon" id="ws-btn-collapse" title="Collapse all">⤓</span>
+      </div>
+      <div class="ws-filterbar">
+        <span class="ws-filter-icon">▤</span>
+        <input type="text" placeholder="Apply a display filter ... <Ctrl-/>" disabled>
+      </div>
+      <div class="ws-list-head">
+        <span>No.</span><span>Time</span><span>Source</span><span>Destination</span><span>Protocol</span><span>Length</span><span>Info</span>
+      </div>
+      <div class="ws-list" id="ws-list"></div>
+      <div class="ws-detail">
+        <div class="ws-detail-tree" id="ws-tree">
+          <div class="ws-hint">Select a packet above to inspect its frame details.</div>
+        </div>
+        <div class="ws-detail-hex" id="ws-hex"></div>
+      </div>
+      <div class="ws-statusbar" id="ws-status">Packets: 0 &nbsp;·&nbsp; Displayed: 0 (100.0%)</div>
+    </div>
+  </section>
+
+  <section class="section" id="scan-upload">
+    <h2>Upload a scan for triage</h2>
+    <p class="sub">SMEs can drop in a raw vulnerability scan export and get it ranked into a plain-language, fix-first priority list — no security team required to read it.</p>
+    <div class="uploader" id="uploader">
+      <input type="file" id="scan-file-input" accept=".csv,.txt" style="display:none;">
+      <div class="uploader-drop" id="uploader-drop">
+        <div class="uploader-icon">⇪</div>
+        <div class="uploader-text">Drag a CSV scan export here, or <span class="uploader-link" id="uploader-browse">choose a file</span></div>
+        <div class="uploader-hint">Expected columns: cve_id, cvss, component, description</div>
+        <div class="uploader-hint"><a href="#" id="uploader-sample" class="uploader-link">Use sample data instead →</a></div>
+      </div>
+    </div>
+    <div id="scan-results"></div>
+  </section>
+
+  <section class="section" id="triage">
+    <h2>Vulnerability triage</h2>
+    <p class="sub">How findings from this lab move from initial detection through to resolution. Click a card to see the remediation steps.</p>
+    <div class="triage-board">
+      <div class="triage-col">
+        <div class="triage-col-head"><span class="dot dot-new"></span>New <span class="count">2</span></div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-high">High</span>
+            <span class="mono id">FND-014</span>
+          </div>
+          <h4>Repeated SSH auth failures from single source</h4>
+          <p>192.168.1.50 sent 40+ failed logins in under 2 minutes against the Ubuntu agent.</p>
+          <span class="mitre-tag">T1110</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div>
+            <div class="caution">Caution: confirm the source isn't a misconfigured internal script before blocking — check for scheduled jobs from that host first.</div>
+            <ol>
+              <li>Confirm 192.168.1.50 is not an authorized host on this network.</li>
+              <li>Block the source: <code>sudo ufw deny from 192.168.1.50</code></li>
+              <li>Check <code>/var/log/auth.log</code> for any successful login from that IP before the block.</li>
+              <li>If a successful login is found, rotate the affected account's credentials immediately.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-med">Medium</span>
+            <span class="mono id">FND-015</span>
+          </div>
+          <h4>Unusual sudo cache access pattern</h4>
+          <p>Sudo timestamp file accessed outside normal working hours on ubuntu-VirtualBox.</p>
+          <span class="mitre-tag">T1548</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="caution">Caution: clearing sudo cache will force re-authentication for all active sessions on the host.</div>
+            <ol>
+              <li>Check when the timestamp file was last modified: <code>ls -la /var/lib/sudo/ts/</code></li>
+              <li>Correlate the access time against that user's actual login session in <code>last</code>.</li>
+              <li>If unexplained, clear the cache: <code>sudo -k</code></li>
+              <li>Review <code>/etc/sudoers</code> for overly permissive NOPASSWD entries.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="triage-col">
+        <div class="triage-col-head"><span class="dot dot-progress"></span>Investigating <span class="count">2</span></div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-high">High</span>
+            <span class="mono id">FND-011</span>
+          </div>
+          <h4>File integrity alert on /etc/passwd</h4>
+          <p>Confirmed unauthorized write; tracing back to the session that triggered it.</p>
+          <span class="mitre-tag">T1485</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+            <div class="caution">Caution: ensure a current backup exists before restoring — an incorrect restore can lock out valid accounts.</div>
+            <ol>
+              <li>Diff the file against the last known-good backup.</li>
+              <li>Check <code>auditd</code> logs to find the process and user that wrote to the file.</li>
+              <li>If unauthorized, restore from backup and re-run file integrity checks.</li>
+              <li>Widen the FIM watch scope to catch related config files.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="triage-card" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-low">Low</span>
+            <span class="mono id">FND-012</span>
+          </div>
+          <h4>Valid account used from unfamiliar process</h4>
+          <p>Legitimate credentials, but the parent process doesn't match normal usage.</p>
+          <span class="mitre-tag">T1078</span>
+          <div class="triage-details">
+            <div class="difficulty"><span class="lbl">Remediation difficulty</span><div class="bar"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="caution">Caution: disabling the account will interrupt any of that user's active sessions.</div>
+            <ol>
+              <li>Trace the process tree: <code>ps -ef --forest</code></li>
+              <li>Confirm whether the parent process matches an approved script or service.</li>
+              <li>If unclear, temporarily disable the account and force a password reset.</li>
+              <li>Enable extra process auditing for that account going forward.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="triage-col">
+        <div class="triage-col-head"><span class="dot dot-done"></span>Resolved <span class="count">2</span></div>
+        <div class="triage-card is-done" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-high">High</span>
+            <span class="mono id">FND-008</span>
+          </div>
+          <h4>Brute force against SSH — blocked</h4>
+          <p>Active response fired, source IP dropped at the firewall within seconds.</p>
+          <span class="mitre-tag">T1110</span>
+          <div class="triage-details">
+            <div class="caution" style="border-color: var(--panel-border); color: var(--text-dim);">Resolution log — actions already taken.</div>
+            <ol>
+              <li>Wazuh's active response rule triggered automatically at the failure threshold.</li>
+              <li>Source IP was added to the firewall block list for 24 hours.</li>
+              <li>Confirmed no successful authentication occurred before the block.</li>
+              <li>Follow-up: lowered the alert threshold to 5 attempts per 60 seconds for faster response.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="triage-card is-done" onclick="toggleTriage(this)">
+          <div class="triage-card-top">
+            <span class="sev sev-med">Medium</span>
+            <span class="mono id">FND-009</span>
+          </div>
+          <h4>Suspicious command execution</h4>
+          <p>Traced to a test script; rule tuned to reduce false positives going forward.</p>
+          <span class="mitre-tag">T1059</span>
+          <div class="triage-details">
+            <div class="caution" style="border-color: var(--panel-border); color: var(--text-dim);">Resolution log — actions already taken.</div>
+            <ol>
+              <li>Identified the command matched a known test script (<code>whoami; id</code>).</li>
+              <li>Added a rule exception scoped to that script's file hash.</li>
+              <li>Confirmed no lateral movement followed the execution.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="architecture">
+    <h2>How it's wired</h2>
+    <p class="sub">One attacker box, one monitored endpoint, one manager tying it together.</p>
+    <div class="arch">
+      <div class="arch-step"><span class="num">01</span>Kali agent generates attack traffic</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-step"><span class="num">02</span>Ubuntu endpoint logs system + auth events</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-step"><span class="num">03</span>Wazuh manager correlates against rules</div>
+    </div>
+  </section>
+
+  <section class="section" id="metrics">
+    <h2>Last 24 hours</h2>
+    <p class="sub">Pulled straight from the Wazuh dashboard running on this lab.</p>
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="label">Total alerts</div>
+        <div class="value">24</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Critical severity</div>
+        <div class="value red">7</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Threats blocked</div>
+        <div class="value green">15</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Top tactic</div>
+        <div class="value amber" style="font-size:20px;">Defense Evasion</div>
+      </div>
+    </div>
+    <div class="screenshot-frame">
+      <img src="images/wazuh-dashboard.jpg" alt="Wazuh SIEM dashboard showing alerts, top tactics, and MITRE technique breakdown for this lab">
+      <div class="screenshot-caption">The actual Wazuh dashboard for this lab — alert trends, top tactics, and MITRE techniques by agent.</div>
+    </div>
+  </section>
+
+  <section class="section" id="build">
+    <h2>The build</h2>
+    <p class="sub">How the pieces fit together — Wazuh manager, Ubuntu agent, and the attack path this lab is built to catch.</p>
+    <div class="screenshot-frame">
+      <img src="images/soc-lab-infographic.jpg" alt="B-SOC lab architecture diagram: Wazuh SIEM central server, Ubuntu agent, log collection, threat detection, alerting, and response pipeline">
+    </div>
+  </section>
+
+  <section class="section" id="writeups">
+    <h2>Detections & write-ups</h2>
+    <p class="sub">Short breakdowns of attacks run against the lab and how Wazuh caught them.</p>
+    <div class="writeups">
+      <div class="writeup">
+        <div class="tag mono">SEP 2026</div>
+        <div>
+          <h3>Brute force against the Ubuntu agent, detected and blocked</h3>
+          <p>A scripted SSH brute force from the Kali box triggered repeated failed-login rules within seconds. Wazuh's active response fired and blocked the source IP before a valid session was reached.</p>
+          <span class="mitre">T1110 · Brute Force</span>
+        </div>
+      </div>
+      <div class="writeup">
+        <div class="tag mono">SEP 2026</div>
+        <div>
+          <h3>Tracking a privilege escalation attempt through sudo abuse</h3>
+          <p>Sudo and sudo-cache manipulation attempts showed up as a distinct cluster in the tactics breakdown, letting me trace the technique back to a misconfigured sudoers rule on the test host.</p>
+          <span class="mitre">T1548 · Privilege Escalation</span>
+        </div>
+      </div>
+      <div class="writeup">
+        <div class="tag mono">SEP 2026</div>
+        <div>
+          <h3>Mapping file deletion events to a Data Destruction tactic</h3>
+          <p>A test file-wipe script surfaced as file integrity monitoring alerts, then rolled up into the Impact and Defense Evasion tactics on the dashboard's MITRE breakdown.</p>
+          <span class="mitre">T1485 · Data Destruction</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="stack">
+    <h2>Built with</h2>
+    <p class="sub">Everything here is open source and runs on hardware I own.</p>
+    <div class="stack-list">
+      <div class="stack-pill">Wazuh SIEM</div>
+      <div class="stack-pill">Ubuntu Server</div>
+      <div class="stack-pill">Kali Linux</div>
+      <div class="stack-pill">MITRE ATT&CK</div>
+      <div class="stack-pill">VirtualBox</div>
+      <div class="stack-pill">DQL / Wazuh Query</div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <h2>About this lab</h2>
+    <p class="sub" style="max-width:640px;">B-SOC is a self-directed project built to develop and demonstrate hands-on detection engineering skills outside of a formal SOC role.</p>
+    <div class="writeups" style="border-top:none;">
+      <div class="writeup" style="grid-template-columns: 1fr;">
+        <div>
+          <p style="max-width:640px; color:var(--text); font-size:14.5px; margin-bottom:14px;">
+            Every alert on this site comes from a real attack run against the lab, not a simulated screenshot. The goal is to practice the full detection lifecycle: generate realistic attacker behavior, tune correlation rules, map the result to MITRE ATT&CK, and write up the reasoning the way an analyst would document it for a handoff.
+          </p>
+          <p style="max-width:640px; color:var(--text); font-size:14.5px;">
+            Currently working through log analysis, endpoint detection, and active response configuration. Next milestones: adding Suricata for network-based detection and building a basic SOAR playbook for automated triage.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-ctas" style="margin-top:24px;">
+      <a class="btn btn-ghost" href="#">Download resume</a>
+      <a class="btn btn-ghost" href="#">Contact</a>
+    </div>
+  </section>
+
+  <footer>
+    <div>B-SOC — a personal SOC lab, built to learn detection engineering.</div>
+    <div><a href="#">GitHub</a> &nbsp;·&nbsp; <a href="#">LinkedIn</a></div>
+  </footer>
+</div>
+
+<script>
+  const lines = [
+    { t: '2026-09-01 15:02:11', msg: 'sshd: Failed password for invalid user admin from 192.168.1.50', cls:'t-warn' },
+    { t: '2026-09-01 15:02:14', msg: 'wazuh: Brute force attack detected — source 192.168.1.50', cls:'t-crit' },
+    { t: '2026-09-01 15:02:15', msg: 'active-response: firewall-drop executed on 192.168.1.50', cls:'t-ok' },
+    { t: '2026-09-01 15:03:02', msg: 'auditd: sudo executed command /bin/cat by user ubuntu', cls:'' },
+    { t: '2026-09-01 15:03:40', msg: 'syscheck: Suspicious command execution detected', cls:'t-warn' },
+    { t: '2026-09-01 15:04:12', msg: 'wazuh: Unauthorized file change — /etc/passwd', cls:'t-crit' },
+    { t: '2026-09-01 15:04:13', msg: 'agent ubuntu-VirtualBox: alert forwarded to manager', cls:'' },
+  ];
+  const feed = document.getElementById('feed');
+  let i = 0;
+  function addLine(){
+    if(i >= lines.length){ i = 0; feed.innerHTML=''; }
+    const l = lines[i];
+    const div = document.createElement('div');
+    div.className = 'line ' + l.cls;
+    div.textContent = `[${l.t}] ${l.msg}`;
+    feed.appendChild(div);
+    i++;
+    if(feed.children.length > 6){ feed.removeChild(feed.children[0]); }
+  }
+  addLine();
+  setInterval(addLine, 1900);
+
+  // Wireshark-style packet capture
+  const wsListEl = document.getElementById('ws-list');
+  const wsTreeEl = document.getElementById('ws-tree');
+  const wsHexEl = document.getElementById('ws-hex');
+  const wsStatusEl = document.getElementById('ws-status');
+  const wsSources = ['192.168.1.50','192.168.1.10','192.168.1.25','10.0.2.15','192.168.1.10'];
+  const wsDests   = ['192.168.1.10','192.168.1.50','8.8.8.8','192.168.1.1','192.168.1.10'];
+  const wsPackets = [
+    { proto:'TCP', cls:'proto-tcp', len:66, info:'443 → 51422 [ACK] Seq=1 Ack=1 Win=64240' },
+    { proto:'SSH', cls:'proto-ssh', len:82, info:'Client: Protocol (SSH-2.0-OpenSSH_8.9)' },
+    { proto:'SSH', cls:'proto-ssh', len:110, info:'Encrypted request packet len=52' },
+    { proto:'TLS', cls:'proto-http', len:571, info:'Application Data' },
+    { proto:'DNS', cls:'proto-tcp', len:78, info:'Standard query A wazuh-manager.local' },
+    { proto:'HTTP', cls:'proto-http', len:342, info:'GET /dashboard HTTP/1.1' },
+    { proto:'ALERT', cls:'proto-alert', len:64, info:'Repeated auth failure — brute force pattern flagged', alert:true },
+    { proto:'TCP', cls:'proto-tcp', len:60, info:'51423 → 22 [PSH, ACK] Seq=41 Ack=88' },
+    { proto:'ALERT', cls:'proto-alert', len:60, info:'Unauthorized file change detected — /etc/passwd', alert:true },
+  ];
+
+  function wsRandIP(list){ return list[Math.floor(Math.random()*list.length)]; }
+
+  function wsRandHex(len){
+    const rows = Math.min(Math.ceil(len/16), 4);
+    let out = '';
+    for(let r=0;r<rows;r++){
+      const offset = (r*16).toString(16).padStart(4,'0');
+      let hexPart = '';
+      for(let c=0;c<16;c++){ hexPart += Math.floor(Math.random()*256).toString(16).padStart(2,'0') + ' '; }
+      out += offset + '  ' + hexPart + '\n';
+    }
+    return out;
+  }
+
+  let wsFrameNo = 1;
+  let wsTotal = 0;
+  const wsCaptureStartTime = Date.now();
+
+  function wsSelectRow(el, pkt, no, src, dst){
+    document.querySelectorAll('.ws-row').forEach(r=>r.classList.remove('selected'));
+    el.classList.add('selected');
+    wsTreeEl.innerHTML = `
+      <div><span class="arrow">▸</span>Frame ${no}: ${pkt.len} bytes on wire, ${pkt.len} bytes captured</div>
+      <div><span class="arrow">▸</span>Ethernet II, Src: 0c:54:15:56:66:e3, Dst: 26:42:b8:9c:a9:4c</div>
+      <div><span class="arrow">▸</span>Internet Protocol, Src: ${src}, Dst: ${dst}</div>
+      <div><span class="arrow">▾</span><span class="hi">${pkt.proto}</span>${pkt.alert ? ' — flagged by Wazuh correlation rule' : ''}</div>
+    `;
+    wsHexEl.textContent = wsRandHex(pkt.len);
+  }
+
+  function wsAddPacket(){
+    const pkt = wsPackets[Math.floor(Math.random()*wsPackets.length)];
+    const now = new Date();
+    const elapsed = ((Date.now() - wsCaptureStartTime)/1000).toFixed(6);
+    const src = wsRandIP(wsSources);
+    const dst = wsRandIP(wsDests);
+    const no = wsFrameNo++;
+    const row = document.createElement('div');
+    row.className = 'ws-row' + (pkt.alert ? ' is-alert' : '');
+    row.innerHTML = `<span>${no}</span><span>${elapsed}</span><span>${src}</span><span>${dst}</span><span class="proto ${pkt.cls}">${pkt.proto}</span><span>${pkt.len}</span><span>${pkt.info}</span>`;
+    row.addEventListener('click', () => wsSelectRow(row, pkt, no, src, dst));
+    wsListEl.appendChild(row);
+    if(wsListEl.children.length > 16){ wsListEl.removeChild(wsListEl.children[0]); }
+    wsListEl.scrollTop = wsListEl.scrollHeight;
+    wsTotal++;
+    wsStatusEl.textContent = `Packets: ${wsTotal} · Displayed: ${wsTotal} (100.0%)`;
+  }
+  for(let k=0;k<10;k++){ setTimeout(wsAddPacket, k*120); }
+  let wsInterval = setInterval(wsAddPacket, 700);
+  let wsRunning = true;
+
+  const wsRecEl = document.getElementById('ws-rec');
+  const wsTitleEl = document.getElementById('ws-title');
+
+  function wsStart(){
+    if(wsRunning) return;
+    wsInterval = setInterval(wsAddPacket, 700);
+    wsRunning = true;
+    wsRecEl.style.background = 'var(--green)';
+    wsTitleEl.textContent = 'Capturing from Wi-Fi';
+    document.getElementById('ws-btn-start').classList.add('disabled');
+    document.getElementById('ws-btn-stop').classList.remove('disabled');
+    showToast('Capture started.');
+  }
+  function wsStop(){
+    if(!wsRunning) return;
+    clearInterval(wsInterval);
+    wsRunning = false;
+    wsRecEl.style.background = 'var(--text-dim)';
+    wsTitleEl.textContent = 'Capture paused';
+    document.getElementById('ws-btn-start').classList.remove('disabled');
+    document.getElementById('ws-btn-stop').classList.add('disabled');
+    showToast('Capture stopped.');
+  }
+  function wsRestart(){
+    clearInterval(wsInterval);
+    wsListEl.innerHTML = '';
+    wsFrameNo = 1;
+    wsTotal = 0;
+    wsTreeEl.innerHTML = '<div class="ws-hint">Select a packet above to inspect its frame details.</div>';
+    wsHexEl.textContent = '';
+    wsStatusEl.textContent = 'Packets: 0 · Displayed: 0 (100.0%)';
+    for(let k=0;k<10;k++){ setTimeout(wsAddPacket, k*120); }
+    wsInterval = setInterval(wsAddPacket, 700);
+    wsRunning = true;
+    wsRecEl.style.background = 'var(--green)';
+    wsTitleEl.textContent = 'Capturing from Wi-Fi';
+    document.getElementById('ws-btn-start').classList.add('disabled');
+    document.getElementById('ws-btn-stop').classList.remove('disabled');
+    showToast('Capture restarted.');
+  }
+  document.getElementById('ws-btn-start').classList.add('disabled');
+  document.getElementById('ws-btn-start').addEventListener('click', wsStart);
+  document.getElementById('ws-btn-stop').addEventListener('click', wsStop);
+  document.getElementById('ws-btn-restart').addEventListener('click', wsRestart);
+  document.getElementById('ws-btn-open').addEventListener('click', () => scrollToUpload());
+  document.getElementById('ws-btn-save').addEventListener('click', () => showToast('This is a static demo — no live capture file to save.'));
+  document.getElementById('ws-btn-close').addEventListener('click', wsStop);
+  document.getElementById('ws-btn-find').addEventListener('click', () => showToast('Click any packet row to inspect it, or use the filter bar above.'));
+  document.getElementById('ws-btn-prev').addEventListener('click', () => wsStepSelection(-1));
+  document.getElementById('ws-btn-next').addEventListener('click', () => wsStepSelection(1));
+  document.getElementById('ws-btn-expand').addEventListener('click', () => showToast('Frame details expanded.'));
+  document.getElementById('ws-btn-collapse').addEventListener('click', () => showToast('Frame details collapsed.'));
+
+  function wsStepSelection(dir){
+    const rows = Array.from(wsListEl.children);
+    if(!rows.length) return;
+    let idx = rows.findIndex(r => r.classList.contains('selected'));
+    idx = idx === -1 ? 0 : Math.max(0, Math.min(rows.length-1, idx+dir));
+    rows[idx].click();
+    rows[idx].scrollIntoView({block:'nearest'});
+  }
+
+  function scrollToUpload(){
+    document.getElementById('scan-upload').scrollIntoView({behavior:'smooth', block:'start'});
+    showToast('Drop a scan file below to run triage.');
+  }
+
+  // Toast
+  const toastEl = document.createElement('div');
+  toastEl.className = 'ws-toast';
+  document.body.appendChild(toastEl);
+  let toastTimer;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toastEl.classList.remove('show'), 2600);
+  }
+
+  // Menu bar dropdown logic
+  document.querySelectorAll('.ws-menu-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      const wasActive = item.classList.contains('active');
+      document.querySelectorAll('.ws-menu-item').forEach(m => m.classList.remove('active'));
+      if(!wasActive) item.classList.add('active');
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.ws-menu-item').forEach(m => m.classList.remove('active'));
+  });
+  document.querySelectorAll('.ws-dropdown div[data-action]').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const action = opt.getAttribute('data-action');
+      document.querySelectorAll('.ws-menu-item').forEach(m => m.classList.remove('active'));
+      if(action === 'start') wsStart();
+      else if(action === 'stop') wsStop();
+      else if(action === 'restart') wsRestart();
+      else if(action === 'open-upload') scrollToUpload();
+      else if(action === 'next') wsStepSelection(1);
+      else if(action === 'prev') wsStepSelection(-1);
+      else if(action === 'expand') showToast('Frame details expanded.');
+      else if(action === 'collapse') showToast('Frame details collapsed.');
+      else if(action.startsWith('toast:')) showToast(action.slice(6));
+    });
+  });
+
+  // Triage card expand/collapse
+  function toggleTriage(card){
+    card.classList.toggle('expanded');
+  }
+
+  // ---- SME scan upload + triage engine ----
+  const dropZone = document.getElementById('uploader-drop');
+  const fileInput = document.getElementById('scan-file-input');
+  const resultsEl = document.getElementById('scan-results');
+
+  document.getElementById('uploader-browse').addEventListener('click', (e) => { e.preventDefault(); fileInput.click(); });
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => { if(fileInput.files[0]) handleScanFile(fileInput.files[0]); });
+
+  ['dragover','dragenter'].forEach(evt => dropZone.addEventListener(evt, (e)=>{ e.preventDefault(); dropZone.classList.add('drag-over'); }));
+  ['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, (e)=>{ e.preventDefault(); dropZone.classList.remove('drag-over'); }));
+  dropZone.addEventListener('drop', (e) => {
+    if(e.dataTransfer.files[0]) handleScanFile(e.dataTransfer.files[0]);
+  });
+
+  document.getElementById('uploader-sample').addEventListener('click', (e) => {
+    e.preventDefault();
+    const sample = `cve_id,cvss,component,description
+CVE-2024-12345,9.8,libxml2,Buffer overflow in parser allows remote code execution
+CVE-2023-56789,7.5,openssl,Memory corruption in TLS handshake handling
+CVE-2024-90123,5.4,linux-kernel,Race condition in device driver
+CVE-2024-33221,4.2,nginx,Information disclosure via crafted request header`;
+    processScanCSV(sample);
+  });
+
+  function handleScanFile(file){
+    const reader = new FileReader();
+    reader.onload = () => processScanCSV(reader.result);
+    reader.readAsText(file);
+  }
+
+  function severityFromCVSS(score){
+    if(score >= 9) return {label:'Critical', cls:'crit'};
+    if(score >= 7) return {label:'High', cls:'high'};
+    if(score >= 4) return {label:'Medium', cls:'med'};
+    return {label:'Low', cls:'low'};
+  }
+
+  function remediationSteps(component, sev){
+    return [
+      `Identify which assets are running ${component}.`,
+      `Check the currently installed version against the vendor's fixed release.`,
+      `Apply the patch or upgrade ${component} to the fixed version` + (sev==='crit' ? ' as soon as possible — this is remotely exploitable.' : '.'),
+      `Re-run the scan to verify the finding is resolved.`
+    ];
+  }
+
+  function processScanCSV(text){
+    const lines = text.trim().split(/\r?\n/).filter(Boolean);
+    if(lines.length < 2){ showToast('Could not read any rows from that file.'); return; }
+    const rows = lines.slice(1).map(line => {
+      const parts = line.split(',');
+      return {
+        cve: (parts[0]||'').trim(),
+        cvss: parseFloat(parts[1]) || 0,
+        component: (parts[2]||'unknown component').trim(),
+        desc: (parts.slice(3).join(',')||'').trim()
+      };
+    }).filter(r => r.cve);
+
+    rows.sort((a,b) => b.cvss - a.cvss);
+
+    const counts = {crit:0, high:0, med:0, low:0};
+    rows.forEach(r => counts[severityFromCVSS(r.cvss).cls]++);
+
+    let html = `<div class="scan-summary">
+      <span class="chip"><b>${rows.length}</b> findings ranked</span>
+      <span class="chip" style="color:var(--red)"><b>${counts.crit}</b> critical</span>
+      <span class="chip" style="color:var(--amber)"><b>${counts.high}</b> high</span>
+      <span class="chip" style="color:var(--blue)"><b>${counts.med}</b> medium</span>
+      <span class="chip" style="color:var(--green)"><b>${counts.low}</b> low</span>
+    </div>`;
+
+    rows.forEach((r, i) => {
+      const sev = severityFromCVSS(r.cvss);
+      const steps = remediationSteps(r.component, sev.cls);
+      html += `<div class="advisory-card ${sev.cls}">
+        <div class="advisory-top">
+          <span class="advisory-rank">#${i+1} to fix</span>
+          <span class="sev sev-${sev.cls==='crit'?'high':sev.cls}">${sev.label}</span>
+        </div>
+        <h4>${r.cve} — ${r.component}</h4>
+        <div class="meta">CVSS ${r.cvss.toFixed(1)}</div>
+        <div class="desc">${r.desc || 'No description provided in the uploaded scan.'}</div>
+        <ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>
+      </div>`;
+    });
+
+    resultsEl.innerHTML = html;
+    resultsEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+    showToast(`Triaged ${rows.length} findings.`);
+  }
+</script>
+
+</body>
+</html>
